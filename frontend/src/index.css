@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+:root {
+
+  /* Primary Brand Colors */
+  --primary: #FF3E9B;
+  --primary-hover: #e6358c;
+
+  /* Secondary Colors */
+  --secondary: #3A8B95;
+  --secondary-hover: #2f6f76;
+
+  /* Accent Colors */
+  --accent: #66D0BC;
+  --accent-soft: #FF88BA;
+
+  /* Background Colors */
+  --background: #fff7fb;
+  --background-soft: #fdf2f7;
+
+  /* Text Colors */
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --text-light: #ffffff;
+
+  /* Border / UI */
+  --border: #f3d3e3;
+
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes floatSoft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 62 155 / 40%);
+  }
+  100% {
+    box-shadow: 0 0 0 14px rgb(255 62 155 / 0%);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.65s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.7s ease-out both;
+}
+
+.animate-float-soft {
+  animation: fadeUp 0.65s ease-out both, floatSoft 5.5s ease-in-out 0.7s infinite;
+}
+
+.animate-pop-in {
+  animation: popIn 0.45s ease-out both;
+}
+
+.animate-pulse-ring {
+  animation: pulseRing 1.5s ease-out infinite;
+}
+
+.interactive-card {
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.interactive-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgb(31 41 55 / 9%);
+  border-color: var(--accent-soft);
+}
+
+.shimmer-surface {
+  background: linear-gradient(100deg, var(--background-soft) 20%, #ffffff 40%, var(--background-soft) 60%);
+  background-size: 220% 100%;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-float-soft,
+  .animate-pop-in,
+  .animate-pulse-ring,
+  .shimmer-surface {
+    animation: none;
+  }
+
+  .interactive-card {
+    transition: none;
+  }
+}
