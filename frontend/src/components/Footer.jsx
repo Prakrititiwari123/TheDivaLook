@@ -1,68 +1,71 @@
-import { Link } from 'react-router-dom';
+import React from 'react'
 
 const Footer = () => {
   return (
-    <footer className="border-t border-(--border) bg-white">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-4 lg:px-8">
-        <div className="lg:col-span-2">
-          <h3 className="text-2xl font-extrabold text-(--primary)">TheDivaLook</h3>
-          <p className="mt-3 max-w-md text-sm leading-6 text-(--text-secondary)">
-            Discover makeup shades that match your vibe. Try products virtually, compare
-            looks, and shop with confidence.
+
+    <div className="bg-[#3A8B95] text-white mt-20">
+
+      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-3 gap-6">
+
+        <div>
+
+          <h2 className="text-xl font-bold mb-3">
+            The Diva Look
+          </h2>
+
+          <p className="text-sm">
+            Discover makeup that suits your beauty.
+            Try shades virtually and shop your favorites.
           </p>
+
         </div>
+
 
         <div>
-          <h4 className="text-sm font-bold uppercase tracking-wide text-(--text-primary)">Quick Links</h4>
-          <ul className="mt-4 space-y-2 text-sm">
-            <li>
-              <Link to="/" className="text-(--text-secondary) transition hover:text-(--primary)">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link to="/products" className="text-(--text-secondary) transition hover:text-(--primary)">
-                Products
-              </Link>
-            </li>
-            <li>
-              <Link to="/try-makeup" className="text-(--text-secondary) transition hover:text-(--primary)">
-                Try Makeup
-              </Link>
-            </li>
+
+          <h2 className="text-lg font-semibold mb-3">
+            Quick Links
+          </h2>
+
+          <ul className="space-y-2 text-sm">
+
+            <li>Home</li>
+            <li>Products</li>
+            <li>Try Makeup</li>
+            <li>Login</li>
+
           </ul>
+
         </div>
+
 
         <div>
-          <h4 className="text-sm font-bold uppercase tracking-wide text-(--text-primary)">Account</h4>
-          <ul className="mt-4 space-y-2 text-sm">
-            <li>
-              <Link to="/login" className="text-(--text-secondary) transition hover:text-(--primary)">
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link to="/register" className="text-(--text-secondary) transition hover:text-(--primary)">
-                Register
-              </Link>
-            </li>
-            <li>
-              <a href="mailto:support@thedivalook.com" className="text-(--text-secondary) transition hover:text-(--primary)">
-                support@thedivalook.com
-              </a>
-            </li>
-          </ul>
+
+          <h2 className="text-lg font-semibold mb-3">
+            Contact
+          </h2>
+
+          <p className="text-sm">
+            Email: support@thedivalook.com
+          </p>
+
+          <p className="text-sm">
+            Instagram: @thedivalook
+          </p>
+
         </div>
+
       </div>
 
-      <div className="border-t border-(--border) bg-(--background-soft)">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-(--text-secondary) sm:flex-row sm:px-6 lg:px-8">
-          <p>© {new Date().getFullYear()} TheDivaLook. All rights reserved.</p>
-          <p>Glow confidently, every day.</p>
-        </div>
-      </div>
-    </footer>
-  );
-};
+      <div className="text-center py-4 border-t border-[#66D0BC] text-sm">
 
-export default Footer;
+        © 2026 The Diva Look. All rights reserved.
+
+      </div>
+
+    </div>
+
+  )
+}
+
+export default Footer

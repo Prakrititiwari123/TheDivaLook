@@ -1,291 +1,124 @@
-import { useMemo, useRef, useState } from 'react';
-import Webcam from 'react-webcam';
+import React, { useMemo, useState } from "react";
 
-const lipstickShades = ['Ruby Bloom', 'Rosewood', 'Berry Crush', 'Coral Flame'];
-const blushShades = ['Peach Muse', 'Soft Pink', 'Mauve Mist', 'Terracotta Glow'];
-const foundationTones = ['Ivory', 'Warm Beige', 'Honey', 'Caramel'];
+const TryMakeup = () => {
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [selectedShade, setSelectedShade] = useState("Rose Bloom");
+  const [intensity, setIntensity] = useState(55);
 
-const productCatalog = [
-  { name: 'Velvet Matte Lipstick', category: 'lipstick', shade: 'Ruby Bloom', price: '$18' },
-  { name: 'Hydra Gloss', category: 'lipstick', shade: 'Rosewood', price: '$16' },
-  { name: 'Silk Touch Blush', category: 'blush', shade: 'Peach Muse', price: '$22' },
-  { name: 'Radiant Cheek Tint', category: 'blush', shade: 'Soft Pink', price: '$19' },
-  { name: 'Cloud Foundation', category: 'foundation', shade: 'Warm Beige', price: '$28' },
-  { name: 'Skin Match Foundation', category: 'foundation', shade: 'Honey', price: '$30' },
-];
+  const shades = useMemo(
+    () => [
+      { name: "Rose Bloom", color: "#ff4f8c" },
+      { name: "Coral Crush", color: "#ff6f61" },
+      { name: "Berry Muse", color: "#9b2c6f" },
+      { name: "Nude Glow", color: "#c87d68" }
+    ],
+    []
+  );
 
-function TryMakeup() {
-  const webcamRef = useRef(null);
+  const activeShade = shades.find((shade) => shade.name === selectedShade) || shades[0];
 
-  const [selectedLipstick, setSelectedLipstick] = useState(lipstickShades[0]);
-  const [selectedBlush, setSelectedBlush] = useState(blushShades[0]);
-  const [selectedFoundation, setSelectedFoundation] = useState(foundationTones[1]);
-  const [isApplied, setIsApplied] = useState(false);
-  const [savedLooks, setSavedLooks] = useState([]);
-  const [intensity, setIntensity] = useState(70);
-  const [previewMode, setPreviewMode] = useState('after');
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
 
-  const selectedLook = `${selectedLipstick} • ${selectedBlush} • ${selectedFoundation}`;
-
-  const recommendedProducts = useMemo(() => {
-    return productCatalog.filter((product) => {
-      if (product.category === 'lipstick') return product.shade === selectedLipstick;
-      if (product.category === 'blush') return product.shade === selectedBlush;
-      return product.shade === selectedFoundation;
-    });
-  }, [selectedLipstick, selectedBlush, selectedFoundation]);
-
-  const handleApplyMakeup = () => {
-    setIsApplied(true);
-    setPreviewMode('after');
-  };
-
-  const handleRemoveMakeup = () => {
-    setIsApplied(false);
-    setPreviewMode('before');
-  };
-
-  const handleSaveShade = () => {
-    setSavedLooks((previous) => {
-      if (previous.includes(selectedLook)) return previous;
-      return [selectedLook, ...previous].slice(0, 5);
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl((previousUrl) => {
+      if (previousUrl) {
+        URL.revokeObjectURL(previousUrl);
+      }
+      return objectUrl;
     });
   };
+
+  const overlayOpacity = Math.min(Math.max(intensity / 100, 0.2), 0.85);
 
   return (
-    <main className="bg-(--background)">
-      <section className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <header className="mb-8 animate-fade-up">
-          <h1 className="text-3xl font-extrabold text-(--text-primary) sm:text-4xl">
-            Virtual Makeup Try-On
-          </h1>
-          <p className="mt-3 max-w-3xl text-(--text-secondary)">
-            Open your camera, choose your shades, and preview your look with live, adjustable
-            virtual makeup before shopping.
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,#d6fff3,#fff7fb_45%,#ffdbe9)] px-5 py-12 md:px-10">
+      <div className="mx-auto w-full max-w-6xl">
+        <div className="animate-fade-up text-center">
+          <h1 className="text-4xl font-black text-[#1f2937] md:text-5xl">Virtual Makeup Try-On</h1>
+          <p className="mx-auto mt-3 max-w-2xl text-[#4b5563]">
+            Upload your photo, choose a shade, and adjust intensity for a quick virtual preview.
           </p>
-        </header>
-
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <section className="animate-fade-up rounded-3xl border border-(--border) bg-white p-5 shadow-sm sm:p-6">
-            <h2 className="mb-4 text-xl font-bold text-(--text-primary)">Camera Section</h2>
-
-            <div className="relative overflow-hidden rounded-2xl border border-(--border) bg-black">
-              <Webcam
-                ref={webcamRef}
-                audio={false}
-                screenshotFormat="image/jpeg"
-                mirrored
-                className="h-90 w-full object-cover sm:h-105"
-                videoConstraints={{
-                  facingMode: 'user',
-                }}
-              />
-
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <div
-                  className={`h-[62%] w-[56%] rounded-[45%] border-2 border-dashed bg-white/5 ${
-                    isApplied ? 'animate-pulse-ring border-(--accent)' : 'border-white/80'
-                  }`}
-                />
-              </div>
-
-              <p className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">
-                Face detection area
-              </p>
-
-              {isApplied && (
-                <div className="absolute bottom-3 left-3 rounded-full bg-(--primary) px-3 py-1 text-xs font-bold text-white shadow">
-                  Makeup Applied ({intensity}%)
-                </div>
-              )}
-
-              <div className="absolute bottom-3 right-3 rounded-full bg-black/55 px-3 py-1 text-xs font-semibold text-white">
-                {previewMode === 'before' ? 'Before' : 'After'}
-              </div>
-            </div>
-          </section>
-
-          <section
-            className="animate-fade-up rounded-3xl border border-(--border) bg-white p-5 shadow-sm sm:p-6"
-            style={{ animationDelay: '0.1s' }}
-          >
-            <h2 className="mb-4 text-xl font-bold text-(--text-primary)">Makeup Selection Panel</h2>
-
-            <div className="space-y-5">
-              <div>
-                <p className="mb-2 text-sm font-bold text-(--text-primary)">Lipstick shades</p>
-                <div className="flex flex-wrap gap-2">
-                  {lipstickShades.map((shade) => (
-                    <button
-                      key={shade}
-                      type="button"
-                      onClick={() => setSelectedLipstick(shade)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                        selectedLipstick === shade
-                          ? 'border-(--primary) bg-(--primary) text-white'
-                          : 'border-(--border) bg-white text-(--text-primary) hover:bg-(--background-soft)'
-                      }`}
-                    >
-                      {shade}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm font-bold text-(--text-primary)">Blush shades</p>
-                <div className="flex flex-wrap gap-2">
-                  {blushShades.map((shade) => (
-                    <button
-                      key={shade}
-                      type="button"
-                      onClick={() => setSelectedBlush(shade)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                        selectedBlush === shade
-                          ? 'border-(--secondary) bg-(--secondary) text-white'
-                          : 'border-(--border) bg-white text-(--text-primary) hover:bg-(--background-soft)'
-                      }`}
-                    >
-                      {shade}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm font-bold text-(--text-primary)">Foundation tones</p>
-                <div className="flex flex-wrap gap-2">
-                  {foundationTones.map((tone) => (
-                    <button
-                      key={tone}
-                      type="button"
-                      onClick={() => setSelectedFoundation(tone)}
-                      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                        selectedFoundation === tone
-                          ? 'border-(--accent) bg-(--accent) text-white'
-                          : 'border-(--border) bg-white text-(--text-primary) hover:bg-(--background-soft)'
-                      }`}
-                    >
-                      {tone}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-(--background-soft) p-3 text-sm text-(--text-primary)">
-                <p className="font-semibold">Selected look</p>
-                <p className="mt-1 text-(--text-secondary)">{selectedLook}</p>
-              </div>
-
-              <div className="rounded-xl border border-(--border) bg-white p-3">
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-bold text-(--text-primary)">Intensity</p>
-                  <span className="text-xs font-semibold text-(--secondary)">{intensity}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={intensity}
-                  onChange={(event) => setIntensity(Number(event.target.value))}
-                  className="w-full accent-(--primary)"
-                />
-              </div>
-
-              <div>
-                <p className="mb-2 text-sm font-bold text-(--text-primary)">Controls</p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <button
-                    type="button"
-                    onClick={handleApplyMakeup}
-                    className="rounded-lg bg-(--primary) px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-(--primary-hover)"
-                  >
-                    Apply makeup
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleRemoveMakeup}
-                    className="rounded-lg border border-(--border) bg-white px-4 py-2 text-sm font-semibold text-(--text-primary) transition hover:-translate-y-0.5 hover:bg-(--background-soft)"
-                  >
-                    Remove makeup
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveShade}
-                    className="rounded-lg bg-(--secondary) px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-(--secondary-hover)"
-                  >
-                    Save shade
-                  </button>
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPreviewMode('before')}
-                    className={`rounded-lg px-3 py-2 text-xs font-bold ${
-                      previewMode === 'before'
-                        ? 'bg-(--primary) text-white'
-                        : 'border border-(--border) bg-white text-(--text-primary)'
-                    }`}
-                  >
-                    Before
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewMode('after')}
-                    className={`rounded-lg px-3 py-2 text-xs font-bold ${
-                      previewMode === 'after'
-                        ? 'bg-(--secondary) text-white'
-                        : 'border border-(--border) bg-white text-(--text-primary)'
-                    }`}
-                  >
-                    After
-                  </button>
-                </div>
-              </div>
-
-              {savedLooks.length > 0 && (
-                <div>
-                  <p className="mb-2 text-sm font-bold text-(--text-primary)">Saved shades</p>
-                  <ul className="space-y-1 text-xs text-(--text-secondary)">
-                    {savedLooks.map((look) => (
-                      <li
-                        key={look}
-                        className="interactive-card rounded-md border border-(--border) bg-(--background-soft) px-2 py-1.5"
-                      >
-                        {look}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </section>
         </div>
 
-        <section
-          className="mt-8 animate-fade-up rounded-3xl border border-(--border) bg-white p-5 shadow-sm sm:p-6"
-          style={{ animationDelay: '0.15s' }}
-        >
-          <h2 className="mb-4 text-xl font-bold text-(--text-primary)">Recommended Products Section</h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {recommendedProducts.map((product, index) => (
-              <article
-                key={`${product.category}-${product.name}`}
-                className="interactive-card animate-fade-up rounded-2xl border border-(--border) bg-(--background-soft) p-4"
-                style={{ animationDelay: `${0.2 + index * 0.06}s` }}
-              >
-                <div className="shimmer-surface mb-3 h-20 rounded-xl" />
-                <h3 className="text-sm font-bold text-(--text-primary)">{product.name}</h3>
-                <p className="mt-1 text-xs text-(--text-secondary)">{product.shade}</p>
-                <p className="mt-2 text-xs font-bold text-(--primary)">{product.price}</p>
-              </article>
-            ))}
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+          <div className="animate-pop-in rounded-3xl border border-white/80 bg-white/85 p-5 shadow-2xl backdrop-blur-xl md:p-6">
+            <div className="relative overflow-hidden rounded-2xl border border-[#f3d3e3] bg-[#f8fafc]">
+              <div className="aspect-4/5 w-full">
+                {previewUrl ? (
+                  <img src={previewUrl} alt="Makeup preview" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center text-center">
+                    <div className="animate-pulse-ring h-16 w-16 rounded-full bg-white" />
+                    <p className="mt-4 text-sm font-semibold text-[#1f2937]">Upload a photo to start preview</p>
+                    <p className="text-xs text-[#6b7280]">JPG or PNG recommended</p>
+                  </div>
+                )}
+              </div>
+              {previewUrl && (
+                <div
+                  className="pointer-events-none absolute inset-0 transition"
+                  style={{
+                    background: `radial-gradient(circle at 52% 68%, ${activeShade.color} 0%, transparent 45%)`,
+                    opacity: overlayOpacity
+                  }}
+                />
+              )}
+            </div>
+
+            <label className="mt-5 inline-flex cursor-pointer rounded-xl bg-[#FF3E9B] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[#e6358c]">
+              Upload Photo
+              <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+            </label>
           </div>
-        </section>
-      </section>
-    </main>
+
+          <div className="animate-fade-up rounded-3xl border border-white/80 bg-white/85 p-5 shadow-xl backdrop-blur-xl md:p-6">
+            <h2 className="text-2xl font-black text-[#1f2937]">Customize Look</h2>
+            <p className="mt-1 text-sm text-[#6b7280]">Select your shade and tune the intensity.</p>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              {shades.map((shade) => (
+                <button
+                  key={shade.name}
+                  onClick={() => setSelectedShade(shade.name)}
+                  className={`interactive-card rounded-xl border px-3 py-3 text-left transition ${
+                    selectedShade === shade.name
+                      ? "border-[#FF3E9B] bg-[#fff1f6]"
+                      : "border-[#f3d3e3] bg-white"
+                  }`}
+                >
+                  <span className="mb-2 block h-5 w-10 rounded-full" style={{ backgroundColor: shade.color }} />
+                  <span className="text-sm font-semibold text-[#1f2937]">{shade.name}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="mt-6">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm font-semibold text-[#1f2937]">Intensity</p>
+                <p className="text-sm font-semibold text-[#3A8B95]">{intensity}%</p>
+              </div>
+              <input
+                type="range"
+                min="20"
+                max="85"
+                value={intensity}
+                onChange={(e) => setIntensity(Number(e.target.value))}
+                className="w-full accent-[#FF3E9B]"
+              />
+            </div>
+
+            <div className="mt-6 rounded-xl border border-[#d7f4ee] bg-[#ecfffb] p-4 text-sm text-[#115e59]">
+              Pro tip: Use bright, front-facing photos for a more accurate virtual blend.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
-}
+};
 
 export default TryMakeup;
