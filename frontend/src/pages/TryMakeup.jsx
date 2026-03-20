@@ -6,6 +6,7 @@ const TryMakeup = () => {
   const [intensity, setIntensity] = useState(55);
 
   const shades = useMemo(
+    
     () => [
       { name: "Rose Bloom", color: "#ff4f8c" },
       { name: "Coral Crush", color: "#ff6f61" },
