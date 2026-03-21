@@ -30,7 +30,8 @@ const Login = () => {
       setIsError(false);
       setMessage("Login successful. Welcome back.");
       
-    } catch (error) {
+    }
+     catch (error) {
       console.log(error);
       setIsError(true);
       setMessage("Login failed. Please check your credentials.");
