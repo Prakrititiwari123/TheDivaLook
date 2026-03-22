@@ -16,7 +16,6 @@ const Login = () => {
       setMessage("Please enter both email and password.");
       return;
     }
-
     setLoading(true);
     setMessage("");
 
