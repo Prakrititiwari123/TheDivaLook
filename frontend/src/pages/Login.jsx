@@ -12,6 +12,7 @@ const Login = () => {
   const [isError, setIsError] = useState(false);
 
   const handleLogin = async () => {
+    
     if (!email || !password) {
       setIsError(true);
       setMessage("Please enter both email and password.");
