@@ -22,7 +22,8 @@ const Login = () => {
     setLoading(true);
     setMessage("");
 
-    try {
+    try
+     {
       const res = await axios.post("http://localhost:4500/api/auth/login", {
         email,
         password
