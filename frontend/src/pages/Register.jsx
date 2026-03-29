@@ -11,7 +11,8 @@ const Register = () => {
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
-  const handleRegister = async () => {
+  const handleRegister = async () => 
+    {
     if (!name || !email || !password) {
       setIsError(true);
       setMessage("Please fill all fields to register.");
