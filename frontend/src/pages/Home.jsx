@@ -1,7 +1,104 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80";
+const CART_STORAGE_KEY = "divaCartItems";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4500";
+
+const getProductTimestamp = (product) => {
+  if (product?.createdAt) {
+    const createdAtTime = new Date(product.createdAt).getTime();
+    if (!Number.isNaN(createdAtTime)) {
+      return createdAtTime;
+    }
+  }
+
+  if (typeof product?._id === "string" && product._id.length >= 8) {
+    const objectIdPrefix = product._id.substring(0, 8);
+    const parsed = Number.parseInt(objectIdPrefix, 16);
+    if (!Number.isNaN(parsed)) {
+      return parsed * 1000;
+    }
+  }
+
+  return 0;
+};
 
 const Home = () => {
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isTopRatedMode, setIsTopRatedMode] = useState(false);
+  const [addedItems, setAddedItems] = useState({});
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        const res = await axios.get(`${API_BASE_URL}/api/products`);
+        const products = Array.isArray(res.data) ? res.data : [];
+        const topRatedProducts = products
+          .filter((product) => typeof product.rating === "number")
+          .sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+        if (topRatedProducts.length > 0) {
+          setFeaturedProducts(topRatedProducts.slice(0, 4));
+          setIsTopRatedMode(true);
+        } else {
+          const latestProducts = [...products]
+            .sort((a, b) => getProductTimestamp(b) - getProductTimestamp(a))
+            .slice(0, 4);
+          setFeaturedProducts(latestProducts);
+          setIsTopRatedMode(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setFeaturedProducts([]);
+        setIsTopRatedMode(false);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    fetchFeaturedProducts();
+  }, []);
+
+  const handleAddToCart = (product) => {
+    if (!product) {
+      return;
+    }
+
+    const productId = product._id || product.name;
+
+    try {
+      const existingCart = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "[]");
+      const nextCart = Array.isArray(existingCart) ? [...existingCart] : [];
+      const existingIndex = nextCart.findIndex((item) => item.id === productId);
+
+      if (existingIndex >= 0) {
+        nextCart[existingIndex].quantity = (nextCart[existingIndex].quantity || 1) + 1;
+      } else {
+        nextCart.push({
+          id: productId,
+          name: product.name || "Beauty Product",
+          brand: product.brand || "Diva Collection",
+          price: product.price || 0,
+          image: product.image || FALLBACK_IMAGE,
+          quantity: 1
+        });
+      }
+
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(nextCart));
+
+      setAddedItems((prev) => ({ ...prev, [productId]: true }));
+      setTimeout(() => {
+        setAddedItems((prev) => ({ ...prev, [productId]: false }));
+      }, 1400);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_right,#ffdce9,#fff7fb_45%,#dcfff7_100%)] px-6 py-14 md:px-10">
       <div className="mx-auto grid w-full max-w-6xl gap-8 md:grid-cols-2 md:items-center">
@@ -67,6 +164,70 @@ const Home = () => {
           </div>
         ))}
       </div>
+
+      <section className="mx-auto mt-16 w-full max-w-6xl">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-2xl font-black text-[#1f2937] md:text-3xl">Featured Products</h2>
+            <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-[#6b7280]">
+              {isTopRatedMode ? "Top Rated Picks" : "Latest Arrivals"}
+            </p>
+          </div>
+          <Link
+            to="/products"
+            className="rounded-xl border border-[#3A8B95] px-4 py-2 text-sm font-semibold text-[#3A8B95] transition hover:bg-[#3A8B95] hover:text-white"
+          >
+            View All
+          </Link>
+        </div>
+
+        {isLoadingProducts && (
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array.from({ length: 4 })].map((_, index) => (
+              <div key={index} className="shimmer-surface h-72 rounded-2xl border border-[#f3d3e3]" />
+            ))}
+          </div>
+        )}
+
+        {!isLoadingProducts && featuredProducts.length === 0 && (
+          <div className="mt-6 rounded-2xl border border-[#f3d3e3] bg-white/90 p-6">
+            <p className="text-sm font-medium text-[#6b7280]">Products will appear here after they are added.</p>
+          </div>
+        )}
+
+        {!isLoadingProducts && featuredProducts.length > 0 && (
+          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {featuredProducts.map((product, index) => (
+              <article
+                key={product._id || `${product.name}-${index}`}
+                className="interactive-card animate-fade-up group overflow-hidden rounded-2xl border border-[#f3d3e3] bg-white/95 shadow-sm"
+                style={{ animationDelay: `${index * 90}ms` }}
+              >
+                <img
+                  src={product.image || FALLBACK_IMAGE}
+                  alt={product.name || "Product image"}
+                  className="h-44 w-full object-cover transition duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = FALLBACK_IMAGE;
+                  }}
+                />
+                <div className="p-4">
+                  <p className="text-sm font-semibold text-[#6b7280]">{product.brand || "Diva Collection"}</p>
+                  <h3 className="mt-1 text-base font-bold text-[#1f2937]">{product.name || "Beauty Product"}</h3>
+                  <p className="mt-2 text-sm font-semibold text-[#FF3E9B]">Rs {product.price ?? "--"}</p>
+                  <button
+                    type="button"
+                    onClick={() => handleAddToCart(product)}
+                    className="mt-3 rounded-lg border border-[#3A8B95] px-3 py-1.5 text-xs font-semibold text-[#3A8B95] transition hover:bg-[#3A8B95] hover:text-white"
+                  >
+                    {addedItems[product._id || product.name] ? "Added" : "Add to Cart"}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 };

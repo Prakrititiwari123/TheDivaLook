@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=900&q=80";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4500";
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,7 +15,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:5000/api/products");
+        const res = await axios.get(`${API_BASE_URL}/api/products`);
         setProducts(res.data || []);
       } catch (fetchError) {
         setError("Unable to load products right now. Please try again.");
@@ -103,9 +106,12 @@ const Products = () => {
               >
                 <div className="overflow-hidden rounded-xl">
                   <img
-                    src={product.image}
+                    src={product.image || FALLBACK_IMAGE}
                     alt={product.name}
                     className="h-44 w-full object-cover transition duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      e.currentTarget.src = FALLBACK_IMAGE;
+                    }}
                   />
                 </div>
 
